@@ -28,6 +28,30 @@ class Process_ocr:
             num_split_img_list.append(split_img)
         return num_split_img_list
 
+    def CardProcess(self):
+        ocr_card_img = []
+        src_card_img = []
+        for i in range(1,6):
+            card_img = cv2.imread('../OCR credit_card recogition/credit_card_0'+str(i)+'.png')
+            card_img = cv2.resize(card_img,(1200,750))
+            card_img = cv2.blur(card_img,(3,3))
+            ocr_img = card_img.copy()
+            card_img = cv2.cvtColor(card_img,cv2.COLOR_BGR2GRAY)
+            src_card_img.append(card_img)
+            _,card_img = cv2.threshold(card_img,150,255,cv2.THRESH_BINARY_INV)
+            Rect_x = []
+            Rect_area = []
+            contours,_ = cv2.findContours(card_img,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)  
+            for cnt in contours:
+                x,y,w,h = cv2.boundingRect(cnt)
+                area = w*h
+                if w>20 and h>45 and w<45 and h<70 and y>300 and y<450:
+                    Rect_x.append((x,y,w,h))
+                    Rect_area.append(area)
+                    cv2.rectangle(ocr_img,(x,y),(x+w,y+h),(0,255,0),2)
+                    crop = ocr_img[y:y+h,x:x+w]
+            ocr_card_img.append(ocr_img)
+
     def ReadCreditCard(self):
         for i in range(1,6):
             card_img = cv2.imread('../OCR credit_card recogition/credit_card_0'+str(i)+'.png',0)
